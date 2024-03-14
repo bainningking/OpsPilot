@@ -12,7 +12,7 @@ pipeline:
 
   - name: LanguageModelFeaturizer
     model_name: "bert"
-    model_weights: "bert-base-chinese"
+    model_weights: "/root/hf_models/google-bert/bert-base-chinese"
     cache_dir: cache/models
 
   - name: LexicalSyntacticFeaturizer

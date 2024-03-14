@@ -75,18 +75,9 @@ class EnterpriseWechatChannel(InputChannel):
                     user_id=user_id, query=msg_content.strip("km").strip()
                 )
                 return HTTPResponse(body="")
+            else:
+                qywx_app.post_chatgpt_answer(user_id=user_id, msg_content=msg_content)
 
-            # 走rasa处理
-            collector = CollectingOutputChannel()
-            thread = Thread(target=asyncio.run, args=(qywx_app.qywx_rasa_qa(
-                request,
-                user_id=user_id,
-                msg_content=msg_content,
-                collector=collector,
-                input_channel=self.name()
-            ),))
-            thread.start()
-
-            return HTTPResponse(body="")
+                return HTTPResponse(body="")
 
         return enterprise_wechathook

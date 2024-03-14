@@ -118,6 +118,7 @@ class ActionWeOpsFallback(Action):
         logger.info(f"无法识别用户的意图，进入默认Fallback，用户输入的信息为:{user_msg}，当前运行模式为:[{run_mode}]")
         self.show_intent_ranking(tracker)
 
+        run_mode = "PROD"
         if run_mode == "DEV":
             dispatcher.utter_message(text="OpsPilot当前运行在开发模式，没有办法回复这些复杂的问题哦")
             return [UserUtteranceReverted()]

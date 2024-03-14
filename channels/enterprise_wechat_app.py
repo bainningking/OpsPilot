@@ -431,38 +431,45 @@ class QYWXApp:
         prompt_template = RedisUtils.get_prompt_template()
         prompt_template = searcher.format_prompt(prompt_template, query)
         results = langchain_qa(doc_search, prompt_template, query)
-        # 2.将答案的来源链接添加到km标题的排序里面
-        langchain_source = dict(
-            map(
-                lambda x: get_source_doc(x.metadata["source"], self.km),
-                results["source_documents"],
-            )
-        )
-        # 4.对参考链接排序
-        langchain_prefix = "\n本回答来源如下："
-        title_sim_prefix = "\n根据您的问题，您还可以查看以下结果："
-        sim_query, link = self.km_qa(query, top_n=top_n)
-        sim_query_dict = dict(zip(sim_query, link))
 
-        sim_query_dict = dict(
-            set(sim_query_dict.items()) - set(langchain_source.items())
-        )
-        sim_query_dict = dict(list(sim_query_dict.items())[:5])
-        result = (
-            results["result"]
-            + langchain_prefix
-            + struct_qywx_answer(
-                len(langchain_source),
-                list(langchain_source.values()),
-                list(langchain_source.keys()),
-            )
-            + title_sim_prefix
-            + struct_qywx_answer(
-                len(sim_query_dict),
-                list(sim_query_dict.values()),
-                list(sim_query_dict.keys()),
-            )
-        )
+        from pathlib import Path
+        langchain_prefix = "\n本回答来源如下："
+        source = list(set([x.metadata["source"].split("\\")[-1] for x in results["source_documents"]]))
+        result = results["result"] + langchain_prefix + '\n' + ' '.join(source)
+
+
+        # # 2.将答案的来源链接添加到km标题的排序里面
+        # langchain_source = dict(
+        #     map(
+        #         lambda x: x.metadata["source"],
+        #         results["source_documents"],
+        #     )
+        # )
+        # # 4.对参考链接排序
+        # langchain_prefix = "\n本回答来源如下："
+        # title_sim_prefix = "\n根据您的问题，您还可以查看以下结果："
+        # sim_query, link = self.km_qa(query, top_n=top_n)
+        # sim_query_dict = dict(zip(sim_query, link))
+
+        # sim_query_dict = dict(
+        #     set(sim_query_dict.items()) - set(langchain_source.items())
+        # )
+        # sim_query_dict = dict(list(sim_query_dict.items())[:5])
+        # result = (
+        #     results["result"]
+        #     + langchain_prefix
+        #     + struct_qywx_answer(
+        #         len(langchain_source),
+        #         list(langchain_source.values()),
+        #         list(langchain_source.keys()),
+        #     )
+        #     + title_sim_prefix
+        #     + struct_qywx_answer(
+        #         len(sim_query_dict),
+        #         list(sim_query_dict.values()),
+        #         list(sim_query_dict.keys()),
+        #     )
+        # )
 
         # 3.若本地未匹配到相关文档，当前通过正则匹配，后续考虑意图识别
         negative_rule = re.compile(r"无法回答|不知道|没有.*信息|未提供.*信息|无关|不确定|没有提到")
@@ -480,11 +487,11 @@ class QYWXApp:
         # redis记录用户问题，供helper功能使用，保存10分钟
         redis_client.rpush("km_" + user_id, query)
         redis_client.expire("km_" + user_id, 10*60)
-        # 发送提示，告知用户序号对应的helper，每天一次
-        if redis_client.get("km_helper" + user_id):
-            return
-        redis_client.set("km_helper" + user_id, "km_helper", ex=24 * 60 * 60)
-        self.post_msg(user_id=user_id, content=helper_map_desc())
+        # # 发送提示，告知用户序号对应的helper，每天一次
+        # if redis_client.get("km_helper" + user_id):
+        #     return
+        # redis_client.set("km_helper" + user_id, "km_helper", ex=24 * 60 * 60)
+        # self.post_msg(user_id=user_id, content=helper_map_desc())
         
 
     @async_fun
@@ -561,9 +568,7 @@ class QYWXApp:
 
 load_dotenv()
 RUN_MODE = os.getenv("RUN_MODE")
-credentials_path = (
-    "dev-config/credentials.yml" if RUN_MODE == "DEV" else DEFAULT_CREDENTIALS_PATH
-)
+credentials_path = "dev-config/credentials.yml" 
 credentials = read_yaml_file(credentials_path)
 qywx_app = QYWXApp(
     **credentials["channels.enterprise_wechat_channel.EnterpriseWechatChannel"]
