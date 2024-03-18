@@ -64,7 +64,7 @@ class EnterpriseWechatChannel(InputChannel):
 
             if msg_type == "event":
                 # 这里返回的不是''，企微就会认为消息没有送达，会重复发送请求
-                qywx_app.post_funny_msg(user_id)
+                # qywx_app.post_funny_msg(user_id)
                 return HTTPResponse(body="")
 
             msg_content = msg_content.strip().lower()

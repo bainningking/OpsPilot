@@ -12,6 +12,7 @@ class ServerSettings(BaseSettings):
     openai_endpoint: Optional[str] = None
     openai_key: Optional[str] = None
     openai_api_temperature: Optional[float] = 0.7
+    openai_model_name: Optional[float] = "gpt-3.5-turbo"
 
     redis_host: str = ""
     redis_port: int = 6379

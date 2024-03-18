@@ -18,7 +18,8 @@ from actions.constant.server_settings import server_settings
 def langchain_qa(doc_search, prompt_template, query):
     llm = ChatOpenAI(openai_api_key=server_settings.openai_key,
                      openai_api_base=server_settings.openai_endpoint,
-                     temperature=server_settings.openai_api_temperature)
+                     temperature=server_settings.openai_api_temperature,
+                     model_name=server_settings.openai_model_name)
     prompt = PromptTemplate(
         template=prompt_template, input_variables=["context", "question"]
     )
@@ -50,7 +51,8 @@ def query_online(url, query):
 def chat_online(query):
     llm = ChatOpenAI(openai_api_key=server_settings.openai_key,
                      openai_api_base=server_settings.openai_endpoint,
-                     temperature=server_settings.openai_api_temperature)
+                     temperature=server_settings.openai_api_temperature,
+                     model_name=server_settings.openai_model_name)
 
     search = BingSearchAPIWrapper(bing_subscription_key=server_settings.bing_search_key,
                                   bing_search_url=server_settings.bing_search_url)
@@ -110,7 +112,8 @@ def query_chatgpt(system_message, user_message):
 
     llm = ChatOpenAI(openai_api_key=server_settings.openai_key,
                      openai_api_base=server_settings.openai_endpoint,
-                     temperature=server_settings.openai_api_temperature)
+                     temperature=server_settings.openai_api_temperature,
+                     model_name=server_settings.openai_model_name)
 
     system_message_prompt = SystemMessagePromptTemplate.from_template(system_message)
     human_template = "{text}"
@@ -127,7 +130,8 @@ def query_chatgpt(system_message, user_message):
 def graph_db_chat(query):
     llm = ChatOpenAI(openai_api_key=server_settings.openai_key,
                      openai_api_base=server_settings.openai_endpoint,
-                     temperature=server_settings.openai_api_temperature)
+                     temperature=server_settings.openai_api_temperature,
+                     model_name=server_settings.openai_model_name)
     graph = Neo4jGraph(
         url=server_settings.neo4j_url, username=server_settings.neo4j_username, password=server_settings.neo4j_password
     )
@@ -174,6 +178,7 @@ def query_chatgpt_with_memory(user_id, query, ttl=300):
             openai_api_key=server_settings.openai_key,
             openai_api_base=server_settings.openai_endpoint,
             temperature=server_settings.openai_api_temperature,
+            model_name=server_settings.openai_model_name
         ),
         prompt=prompt,
         memory=memory,
